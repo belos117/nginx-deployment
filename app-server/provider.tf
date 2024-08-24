@@ -5,14 +5,15 @@ terraform {
       version = "~> 5.0"
     }
   }
-  backend "remote" {
+   
+  cloud { 
+    
+    organization = "henkel_solutions" 
 
-    organization = "henkel_solutions"
-
-    workspaces {
-      name = "nginx-server"
-    }
-  }
+    workspaces { 
+      name = "nginx-server" 
+    } 
+  } 
 }
 
 # Configure the AWS Provider
