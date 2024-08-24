@@ -10,7 +10,7 @@ terraform {
     organization = "henkel_solutions"
 
     workspaces {
-      name = "json-server"
+      name = "nginx-server"
     }
   }
 }

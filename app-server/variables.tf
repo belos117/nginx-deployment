@@ -13,5 +13,5 @@ variable "instance_type" {
 variable "instance_name" {
   description = "server tag"
   type        = string
-  default     = "json-server"
+  default     = "nginx-server"
 }

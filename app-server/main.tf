@@ -1,5 +1,5 @@
 # Create a security group
-resource "aws_security_group" "json-server-security-group" {
+resource "aws_security_group" "nginx-server-security-group" {
   name_prefix = "web-sg"
   
   ingress {
@@ -24,7 +24,7 @@ resource "aws_security_group" "json-server-security-group" {
   }
   
   tags = {
-    Name = "Json Server Security Group"
+    Name = "Nginx Server Security Group"
   }
 }
 
@@ -39,9 +39,9 @@ resource "aws_instance" "app-server-instance" {
   ami           = var.ami_image
   instance_type = var.instance_type
   key_name      = aws_key_pair.deployer.key_name
-  vpc_security_group_ids = [aws_security_group.json-server-security-group.id]
+  vpc_security_group_ids = [aws_security_group.nginx-server-security-group.id]
 
   tags = {
-    Name = "App Server Instance"
+    Name = "Nginx Server"
   }
 }
