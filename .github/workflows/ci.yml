@@ -1,0 +1,83 @@
+name: CI
+
+on:
+  push:
+    branches:
+    - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    env:
+      AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY }}
+      AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_KEY }}
+      SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+      SSH_PUBLIC_KEY: ${{ secrets.SSH_PUBLIC_KEY }}
+      TERRAFORM_STATE_TOKEN: ${{ secrets.TERRAFORM_STATE_TOKEN }}
+      ANSIBLE_USER: ${{ secrets.ANSIBLE_USER }}
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+    
+    - name: Install jq
+      run: sudo apt-get install -y jq
+
+    - name: Set up SSH
+      run: |
+        echo "${{ secrets.SSH_PRIVATE_KEY }}" > private_key.pem
+        chmod 600 private_key.pem
+
+    - name: Install Ansible
+      shell: bash
+      run: |
+        sudo apt update
+        sudo apt install software-properties-common
+        sudo add-apt-repository --yes --update ppa:ansible/ansible
+        sudo apt install ansible
+
+    - uses: actions/setup-node@v3
+      with:
+        node-version: '14'
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: '${{ secrets.AWS_ACCESS_KEY }}'
+        aws-secret-access-key: '${{ secrets.AWS_SECRET_KEY }}'
+        aws-region: eu-west-2
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v2
+      with: 
+        terraform_wrapper: false
+        cli_config_credentials_token: ${{ secrets.TERRAFORM_STATE_TOKEN }}
+    - name: Terraform Apply
+      id:   apply
+      run: |
+        cd app-server/
+        terraform init
+        terraform validate
+        terraform plan 
+        terraform apply -auto-approve
+
+    - name: Parse Terraform output
+      id: parse_output
+      run: |
+        IP=$(terraform output -json | jq -r '.instance_public_ip.value')
+        echo "Server IP: $IP"
+        echo "::set-output name=HOST_IP::$IP"
+      working-directory: ./app-server
+
+    - name: Add HOST IP to GitHub Secrets
+      run: |
+        echo $HOST_IP > ./app-server/playbooks/inventory.ini
+      env:
+        HOST_IP: ${{ steps.parse_output.outputs.HOST_IP }}
+
+    - name: Run Ansible Playbook
+      env:
+          ANSIBLE_USER: ${{ secrets.ANSIBLE_USER }}
+          ANSIBLE_HOST_KEY_CHECKING: False
+      run: |
+          ansible-playbook -i playbooks/inventory.ini playbooks/deploy-server.yml --private-key private_key.pem -u ${{ secrets.ANSIBLE_USER }}
+
