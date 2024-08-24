@@ -18,7 +18,7 @@ jobs:
       AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_KEY }}
       SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
       SSH_PUBLIC_KEY: ${{ secrets.SSH_PUBLIC_KEY }}
-      TERRAFORM_STATE_TOKEN: ${{ secrets.TERRAFORM_STATE_TOKEN }}
+      TF_TOKEN: ${{ secrets.TF_TOKEN }}
 
     steps:
     - name: Checkout code
@@ -37,7 +37,7 @@ jobs:
       uses: hashicorp/setup-terraform@v2
       with: 
         terraform_wrapper: false
-        cli_config_credentials_token: ${{ secrets.TERRAFORM_STATE_TOKEN }}
+        cli_config_credentials_token: ${{ secrets.TF_TOKEN }}
     - name: Terraform Destroy
       id:   destroy
       run: |
