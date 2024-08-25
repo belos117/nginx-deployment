@@ -81,7 +81,7 @@ jobs:
 
     - name: Add HOST IP to inventory file
       run: |
-        sudo echo $HOST_IP > /home/runner/work/nginx-deployment/nginx-deployment/inventory.ini
+        sudo echo $HOST_IP > /home/runner/work/nginx-deployment/nginx-deployment/playbooks/inventory.ini
       env:
         HOST_IP: ${{ steps.parse_output.outputs.HOST_IP }}
 
