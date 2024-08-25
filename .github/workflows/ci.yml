@@ -79,9 +79,9 @@ jobs:
         echo "::set-output name=HOST_IP::$IP"
       working-directory: ./app-server
 
-    - name: Add HOST IP to GitHub Secrets
+    - name: Add HOST IP to inventory file
       run: |
-        sudo echo $HOST_IP > HOST_IP.txt
+        sudo echo $HOST_IP > /home/runner/work/nginx-deployment/nginx-deployment/inventory.ini
       env:
         HOST_IP: ${{ steps.parse_output.outputs.HOST_IP }}
 

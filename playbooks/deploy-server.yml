@@ -1,5 +1,5 @@
 - name: Install and Configure Nginx
-  hosts: ${{ secrets.HOST_IP }}
+  hosts: all
   become: true
   pre_tasks:
     - name: Set SSH user for Ubuntu
