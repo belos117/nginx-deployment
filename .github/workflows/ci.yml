@@ -16,6 +16,7 @@ jobs:
       SSH_PUBLIC_KEY: ${{ secrets.SSH_PUBLIC_KEY }}
       TF_TOKEN: ${{ secrets.TF_TOKEN }}
       ANSIBLE_USER: ${{ secrets.ANSIBLE_USER }}
+      HOST_IP: ${{ secrets.HOST_IP }}
 
     steps:
     - name: Checkout code
@@ -23,6 +24,16 @@ jobs:
     
     - name: Install jq
       run: sudo apt-get install -y jq
+
+    - name: Install Github cli
+      run: |
+        (type -p wget >/dev/null || (sudo apt update && sudo apt-get install wget -y)) \
+        && sudo mkdir -p -m 755 /etc/apt/keyrings \
+        && wget -qO- https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo tee /etc/apt/keyrings/githubcli-archive-keyring.gpg > /dev/null \
+        && sudo chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg \
+        && echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
+        && sudo apt update \
+        && sudo apt install gh -y
 
     - name: Set up SSH
       run: |
@@ -70,7 +81,7 @@ jobs:
 
     - name: Add HOST IP to GitHub Secrets
       run: |
-        sudo echo $HOST_IP > /etc/ansible/hosts
+        sudo echo $HOST_IP > HOST_IP.txt
       env:
         HOST_IP: ${{ steps.parse_output.outputs.HOST_IP }}
 
