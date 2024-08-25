@@ -35,11 +35,6 @@ jobs:
         && sudo apt update \
         && sudo apt install gh -y
 
-    - name: Set up SSH
-      run: |
-        echo "${{ secrets.SSH_PRIVATE_KEY }}" > private_key.pem
-        chmod 600 private_key.pem
-
     - name: Install Ansible
       shell: bash
       run: |
@@ -84,6 +79,11 @@ jobs:
         sudo echo $HOST_IP > /home/runner/work/nginx-deployment/nginx-deployment/playbooks/inventory.ini
       env:
         HOST_IP: ${{ steps.parse_output.outputs.HOST_IP }}
+
+    - name: Set up SSH
+      run: |
+        echo "${{ secrets.SSH_PRIVATE_KEY }}" > private_key.pem
+        chmod 666 private_key.pem
 
     - name: Run Ansible Playbook
       env:
