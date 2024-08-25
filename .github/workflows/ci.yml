@@ -82,13 +82,13 @@ jobs:
 
     - name: Set up SSH
       run: |
-        echo "${{ secrets.SSH_PRIVATE_KEY }}" > private_key.pem
-        chmod 666 private_key.pem
+        echo "${{ secrets.SSH_PRIVATE_KEY }}" > /home/runner/work/private_key.pem
+        chmod 600 private_key.pem
 
     - name: Run Ansible Playbook
       env:
           ANSIBLE_USER: ${{ secrets.ANSIBLE_USER }}
           ANSIBLE_HOST_KEY_CHECKING: False
       run: |
-          ansible-playbook -i playbooks/inventory.ini playbooks/deploy-server.yml --private-key private_key.pem -u ${{ secrets.ANSIBLE_USER }}
+          ansible-playbook -i playbooks/inventory.ini playbooks/deploy-server.yml --private-key /home/runner/work/private_key.pem -u ${{ secrets.ANSIBLE_USER }}
 
