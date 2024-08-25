@@ -70,7 +70,7 @@ jobs:
 
     - name: Add HOST IP to GitHub Secrets
       run: |
-        echo $HOST_IP > /etc/ansible/hosts
+        sudo echo $HOST_IP > /etc/ansible/hosts
       env:
         HOST_IP: ${{ steps.parse_output.outputs.HOST_IP }}
 
