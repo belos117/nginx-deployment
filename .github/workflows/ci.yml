@@ -83,6 +83,9 @@ jobs:
     - name: Setup SSH 
       shell: bash
       run: |
+        sudo apt-get update
+        sudo apt-get upgrade
+        sudo apt-get install openssh-client
         sudo echo ${{ secrets.SSH_PRIVATE_KEY }} > private_key.pem
         sudo chmod 660 private_key.pem
       working-directory: /home/runner/work/nginx-deployment/nginx-deployment/playbooks/
@@ -90,6 +93,7 @@ jobs:
     - name: Run ansible script
       shell: bash 
       run: |
+        sudo systemctl restart ssh
         ansible-playbook -i inventory.ini deploy-server.yml --private-key private_key.pem -u ${{ secrets.ANSIBLE_USER }}
       working-directory: /home/runner/work/nginx-deployment/nginx-deployment/playbooks/     
 
