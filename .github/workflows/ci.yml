@@ -80,7 +80,11 @@ jobs:
       env:
         HOST_IP: ${{ steps.parse_output.outputs.HOST_IP }}
 
-    - name: Setup SSH key
-      uses: webfactory/ssh-agent@v0.5.3
-      with:
-        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+    - name: Setup SSH 
+      shell: bash
+      run: |
+        sudo echo ${{ secrets.SSH_PRIVATE_KEY }} > private_key.pem
+        sudo chmod 660 private_key.pem
+      working-directory: /home/runner/work/nginx-deployment/nginx-deployment/playbooks/
+          
+
