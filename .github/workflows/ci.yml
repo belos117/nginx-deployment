@@ -81,11 +81,14 @@ jobs:
         HOST_IP: ${{ steps.parse_output.outputs.HOST_IP }}
 
     - name: Set up SSH and Run Ansible Playbook
+      uses: dawidd6/action-ansible-playbook@v2
       env:
           ANSIBLE_USER: ${{ secrets.ANSIBLE_USER }}
           ANSIBLE_HOST_KEY_CHECKING: False
-      run: |
-        echo "${{ secrets.SSH_PRIVATE_KEY }}" > private_key.pem
-        chmod 600 private_key.pem
-        ansible-playbook -i playbooks/inventory.ini playbooks/deploy-server.yml --private-key private_key.pem -u ${{ secrets.ANSIBLE_USER }}
+      with:
+        playbook: playbooks/deploy-server.yml
+        key: ${{secrets.SSH_PRIVATE_KEY}}
+        inventory: |
+          inventory.ini
+
 
