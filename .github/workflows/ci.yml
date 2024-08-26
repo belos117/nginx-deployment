@@ -90,5 +90,6 @@ jobs:
     - name: Run ansible script
       shell: bash 
       run: |
-        ansible playbook -i inventory.ini --private-key private_key.pem -u ${{ secrets.ANSIBLE_USER }} -f deploy-server.yml   
+        ansible-playbook -i inventory.ini deploy-server.yml --private-key private_key.pem -u ${{ secrets.ANSIBLE_USER }}
+      working-directory: /home/runner/work/nginx-deployment/nginx-deployment/playbooks/     
 
