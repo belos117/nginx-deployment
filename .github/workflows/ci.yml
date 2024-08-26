@@ -86,5 +86,9 @@ jobs:
         sudo echo ${{ secrets.SSH_PRIVATE_KEY }} > private_key.pem
         sudo chmod 660 private_key.pem
       working-directory: /home/runner/work/nginx-deployment/nginx-deployment/playbooks/
-          
+
+    - name: Run ansible script
+      shell: bash 
+      run: |
+        ansible playbook -i inventory.ini --private-key private_key.pem -u ${{ secrets.ANSIBLE_USER }} -f deploy-server.yml   
 
