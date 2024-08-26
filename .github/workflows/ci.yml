@@ -83,12 +83,10 @@ jobs:
     - name: Setup SSH 
       shell: bash
       run: |
-         eval `ssh-agent -s`
-         mkdir -p /home/runner/.ssh/
-         touch /home/runner/.ssh/id_rsa
-         echo -e "${{secrets.SSH_PRIVATE_KEY}}" > /home/runner/.ssh/id_rsa
-         chmod 700 /home/runner/.ssh/id_rsa
-         ssh-keyscan -t rsa,dsa,ecdsa,ed25519 $HOST_IP >> /home/runner/.ssh/known_hosts
+         touch home/runner/.ssh
+         sudo echo ${{ secrets.SSH_PRIVATE_KEY}} > home/runner/.ssh/priavte_key.pem
+         sudo chmod 660 private_key.pem
+
     - name: Run ansible script
       shell: bash 
       run: |
