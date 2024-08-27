@@ -92,4 +92,4 @@ jobs:
           ANSIBLE_HOST_KEY_CHECKING: False
         shell: bash
         run: |
-          ansible-playbook -i playbooks/inventory.ini playbooks/deploy-server.yml --private-key private_key.pem -u ubuntu
+          ansible-playbook -i playbooks/inventory.ini playbooks/deploy-server.yml --private-key ~/.ssh/private_key.pem -u ubuntu
