@@ -1,3 +1,4 @@
+---
 - name: Install and Configure Nginx
   hosts: all
   become: true
@@ -7,7 +8,6 @@
         ansible_user: ubuntu
       when: ansible_os_family == "Debian"
 
-  tasks:
     - name: Install Nginx Web Server
       ansible.builtin.apt:
         update_cache: true
@@ -25,7 +25,7 @@
           <h1>Served from {{ ansible_hostname }}</h1>
           </body>touch
           </html>
-        mode: '0644'
+        mode: "0644"
 
     - name: Ensure Nginx is running and enabled
       ansible.builtin.service:

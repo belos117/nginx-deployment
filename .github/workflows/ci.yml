@@ -3,7 +3,7 @@ name: CI
 on:
   push:
     branches:
-    - main
+      - main
 
 jobs:
   deploy:
@@ -19,79 +19,77 @@ jobs:
       HOST_IP: ${{ secrets.HOST_IP }}
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
-    
-    - name: Install jq
-      run: sudo apt-get install -y jq
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-    - name: Install Github cli
-      run: |
-        (type -p wget >/dev/null || (sudo apt update && sudo apt-get install wget -y)) \
-        && sudo mkdir -p -m 755 /etc/apt/keyrings \
-        && wget -qO- https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo tee /etc/apt/keyrings/githubcli-archive-keyring.gpg > /dev/null \
-        && sudo chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg \
-        && echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
-        && sudo apt update \
-        && sudo apt install gh -y
+      - name: Install jq
+        run: sudo apt-get install -y jq
 
-    - name: Install Ansible
-      shell: bash
-      run: |
-        sudo apt update
-        sudo apt install software-properties-common
-        sudo add-apt-repository --yes --update ppa:ansible/ansible
-        sudo apt install ansible
+      - name: Install Github cli
+        run: |
+          (type -p wget >/dev/null || (sudo apt update && sudo apt-get install wget -y)) \
+          && sudo mkdir -p -m 755 /etc/apt/keyrings \
+          && wget -qO- https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo tee /etc/apt/keyrings/githubcli-archive-keyring.gpg > /dev/null \
+          && sudo chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg \
+          && echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
+          && sudo apt update \
+          && sudo apt install gh -y
 
-    - uses: actions/setup-node@v3
-      with:
-        node-version: '14'
-    - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v1
-      with:
-        aws-access-key-id: '${{ secrets.AWS_ACCESS_KEY }}'
-        aws-secret-access-key: '${{ secrets.AWS_SECRET_KEY }}'
-        aws-region: eu-west-2
-    - name: Setup Terraform
-      uses: hashicorp/setup-terraform@v2
-      with: 
-        terraform_wrapper: false
-        cli_config_credentials_token: ${{ secrets.TF_TOKEN }}
-    - name: Terraform Apply
-      id:   apply
-      run: |
-        cd app-server/
-        terraform init
-        terraform validate
-        terraform plan 
-        terraform apply -auto-approve
+      - name: Install Ansible
+        shell: bash
+        run: |
+          sudo apt update
+          sudo apt install software-properties-common
+          sudo add-apt-repository --yes --update ppa:ansible/ansible
+          sudo apt install ansible
 
-    - name: Parse Terraform output
-      id: parse_output
-      run: |
-        IP=$(terraform output -json | jq -r '.instance_public_ip.value')
-        echo "Server IP: $IP"
-        echo "::set-output name=HOST_IP::$IP"
-      working-directory: ./app-server
+      - uses: actions/setup-node@v3
+        with:
+          node-version: "14"
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: "${{ secrets.AWS_ACCESS_KEY }}"
+          aws-secret-access-key: "${{ secrets.AWS_SECRET_KEY }}"
+          aws-region: eu-west-2
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_wrapper: false
+          cli_config_credentials_token: ${{ secrets.TF_TOKEN }}
+      - name: Terraform Apply
+        id: apply
+        run: |
+          cd app-server/
+          terraform init
+          terraform validate
+          terraform plan
+          terraform apply -auto-approve
 
-    - name: Add HOST IP to inventory file
-      run: |
-        sudo echo $HOST_IP > /home/runner/work/nginx-deployment/nginx-deployment/playbooks/inventory.ini
-      env:
-        HOST_IP: ${{ steps.parse_output.outputs.HOST_IP }}
+      - name: Parse Terraform output
+        id: parse_output
+        run: |
+          IP=$(terraform output -json | jq -r '.instance_public_ip.value')
+          echo "Server IP: $IP"
+          echo "::set-output name=HOST_IP::$IP"
+        working-directory: ./app-server
 
-    - name: Setup SSH 
-      shell: bash
-      run: |
-        sudo echo ${{ secrets.SSH_PRIVATE_KEY }} > private_key.pem
-        sudo chmod 660 private_key.pem
-      working-directory: /home/runner/work/nginx-deployment/nginx-deployment/playbooks/
+      - name: Add HOST IP to inventory file
+        run: |
+          sudo echo $HOST_IP > /home/runner/work/nginx-deployment/nginx-deployment/playbooks/inventory.ini
+        env:
+          HOST_IP: ${{ steps.parse_output.outputs.HOST_IP }}
 
-    - name: Run ansible script
-      env:
-        ANSIBLE_HOST_KEY_CHECKING: False
-      shell: bash 
-      run: |
-        ansible-playbook -i inventory.ini deploy-server.yml --private-key private_key.pem -u ${{ secrets.ANSIBLE_USER }}
-      working-directory: /home/runner/work/nginx-deployment/nginx-deployment/playbooks/     
+      - name: Setup SSH
+        shell: bash
+        run: |
+          mkdir -p ~/.ssh
+          sudo echo ${{ secrets.SSH_PRIVATE_KEY }} > ~/.ssh/private_key.pem
+          sudo chmod 660 private_key.pem
 
+      - name: Run ansible script
+        env:
+          ANSIBLE_HOST_KEY_CHECKING: False
+        shell: bash
+        run: |
+          ansible-playbook -i playbooks/inventory.ini playbooks/deploy-server.yml --private-key private_key.pem -u ubuntu
