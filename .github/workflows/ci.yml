@@ -88,8 +88,6 @@ jobs:
           sudo chmod 600 ~/.ssh/private_key.pem
 
       - name: Run ansible script
-        env:
-          ANSIBLE_HOST_KEY_CHECKING: False
         shell: bash
         run: |
-          ansible-playbook -i playbooks/inventory.ini playbooks/deploy-server.yml --private-key ~/.ssh/private_key.pem -u ubuntu
+          ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i playbooks/inventory.ini playbooks/deploy-server.yml --private-key ~/.ssh/private_key.pem -u ubuntu
