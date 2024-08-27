@@ -85,7 +85,7 @@ jobs:
         run: |
           mkdir -p ~/.ssh
           sudo echo ${{ secrets.SSH_PRIVATE_KEY }} > ~/.ssh/private_key.pem
-          sudo chmod 660 ~/.ssh/private_key.pem
+          sudo chmod 600 ~/.ssh/private_key.pem
 
       - name: Run ansible script
         env:
