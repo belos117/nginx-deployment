@@ -35,15 +35,18 @@ jobs:
           && sudo apt update \
           && sudo apt install gh -y
 
-      - name: Install Ansible
-        shell: bash
-        run: |
-          sudo apt update
-          sudo apt install software-properties-common
-          sudo add-apt-repository --yes --update ppa:ansible/ansible
-          sudo apt install ansible
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
 
-      - uses: actions/setup-node@v3
+      - name: Install Ansible
+        run: |
+          python -m pip install --upgrade pip
+          pip install ansible
+
+      - name: Authenticate AWS
+        uses: actions/setup-node@v3
         with:
           node-version: "14"
       - name: Configure AWS credentials
@@ -71,7 +74,7 @@ jobs:
         run: |
           IP=$(terraform output -json | jq -r '.instance_public_ip.value')
           echo "Server IP: $IP"
-          echo "::set-output name=HOST_IP::$IP"
+          echo "HOST_IP=$IP" >> $GITHUB_OUTPUT
         working-directory: ./app-server
 
       - name: Add HOST IP to inventory file
