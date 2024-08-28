@@ -90,7 +90,15 @@ jobs:
           sudo echo ${{ secrets.SSH_PRIVATE_KEY }} > ~/.ssh/private_key.pem
           sudo chmod 600 ~/.ssh/private_key.pem
 
-      - name: Run ansible script
-        shell: bash
+      - name: Wait for instance to be ready
         run: |
-          ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i playbooks/inventory.ini playbooks/deploy-server.yml --private-key ~/.ssh/private_key.pem -u ubuntu
+          echo "Waiting for instance to initialize..."
+          sleep 60
+
+      - name: Run Ansible playbook
+        run: |
+          ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i playbooks/inventory.ini playbooks/deploy-server.yml --private-key ~/.ssh/private_key.pem -u ubuntu -vvv
+
+      - name: Check EC2 instance state
+        run: |
+          aws ec2 describe-instances --instance-ids $(terraform output -raw instance_id) --query 'Reservations[].Instances[].State.Name' --output text
