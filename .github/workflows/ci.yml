@@ -79,10 +79,9 @@ jobs:
         id: parse_output
         run: |
           cd app-server/
-          IP=$(terraform output -raw instance_public_ip)
-          echo "Raw output: $(terraform output -json)"
+          IP=$(terraform output -json | jq -r '.instance_public_ip.value')
           echo "Server IP: $IP"
-          echo "HOST_IP=$IP" >> $GITHUB_OUTPUT
+          echo "HOST_IP=$IP" >> $GITHUB_ENV
 
       - name: Add HOST IP to inventory file
         run: |
