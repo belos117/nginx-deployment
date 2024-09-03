@@ -69,47 +69,16 @@ jobs:
           terraform plan
           terraform apply -auto-approve
 
-      - name: Debug Terraform output
-        run: |
-          cd app-server/
-          terraform output
-          terraform show
-
-      - name: Get Instance IP
+      - name: Parse Terraform output
         id: parse_output
         run: |
-          # Fetch the Terraform output in JSON format
-          OUTPUT=$(terraform output -json)
-
-          # Print the raw output for debugging
-          echo "Raw Terraform Output: $OUTPUT"
-
-          # Extract the instance public IP using jq
-          IP=$(echo $OUTPUT | jq -r '.instance_public_ip.value')
-
-          # Print the extracted IP
+          IP=$(terraform output -json | jq -r '.instance_public_ip.value')
           echo "Server IP: $IP"
-          echo "HOST_IP=$IP" >> $GITHUB_ENV
-          echo "HOST_IP=$IP" >> $HOST_IP
-
-      - name: Add HOST IP to inventory file
+          echo "::set-output name=HOST_IP::$IP"
+          working-directory: ./app-server
+    
+      - name: Add HOST IP to GitHub Secrets
         run: |
-          sudo echo $HOST_IP > /home/runner/work/nginx-deployment/nginx-deployment/playbooks/inventory.ini
-        env:
-          HOST_IP: ${{ steps.parse_output.outputs.HOST_IP }}
-
-      - name: Setup SSH
-        shell: bash
-        run: |
-          mkdir -p ~/.ssh
-          sudo echo ${{ secrets.SSH_PRIVATE_KEY }} > ~/.ssh/private_key.pem
-          sudo chmod 600 ~/.ssh/private_key.pem
-
-      - name: Wait for instance to be ready
-        run: |
-          echo "Waiting for instance to initialize..."
-          sleep 60
-
-      - name: Run Ansible playbook
-        run: |
-          ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i playbooks/inventory.ini playbooks/deploy-server.yml --private-key ~/.ssh/private_key.pem -u ubuntu -vvv
+          echo $HOST_IP > /tmp/host_ip.txt
+          env:
+            HOST_IP: ${{ steps.parse_output.outputs.HOST_IP }}
