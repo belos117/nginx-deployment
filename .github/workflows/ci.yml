@@ -20,7 +20,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3  # Updated to the latest
 
       - name: Install jq
         run: sudo apt-get install -y jq
@@ -38,7 +38,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.x'
+          python-version: 3.x
 
       - name: Install Ansible
         run: |
@@ -50,7 +50,7 @@ jobs:
         with:
           node-version: "14"
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: "${{ secrets.AWS_ACCESS_KEY }}"
           aws-secret-access-key: "${{ secrets.AWS_SECRET_KEY }}"
@@ -74,8 +74,8 @@ jobs:
         run: |
           IP=$(terraform output -json | jq -r '.instance_public_ip.value')
           echo "Server IP: $IP"
-          echo "::set-output name=HOST_IP::$IP"
-          working-directory: ./app-server
+          echo "HOST_IP=$IP" >> $GITHUB_OUTPUT
+        working-directory: ./app-server
     
       - name: Add HOST IP to GitHub Secrets
         run: |
