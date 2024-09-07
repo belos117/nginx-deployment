@@ -85,10 +85,13 @@ jobs:
         run: |
           echo "$SSH_PRIVATE_KEY" > private_key.pem
           chmod 600 private_key.pem
+          echo "Attempting to connect to ${{ steps.parse_output.outputs.HOST_IP }}"
+          ssh -i private_key.pem -o StrictHostKeyChecking=no $ANSIBLE_USER@${{ steps.parse_output.outputs.HOST_IP }} "echo 'SSH connection successful'"
           ansible-playbook -i "${{ steps.parse_output.outputs.HOST_IP }}," \
             --private-key=private_key.pem \
             -u $ANSIBLE_USER \
             -e "ansible_ssh_common_args='-o StrictHostKeyChecking=no'" \
+            -vvv \
             playbooks/deploy-server.yml
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
