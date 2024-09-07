@@ -81,12 +81,26 @@ jobs:
         run: |
           echo "${{ steps.parse_output.outputs.HOST_IP }}" > /tmp/host_ip.txt
 
+      - name: Wait for instance to be ready
+        run: |
+          echo "Waiting for instance to be ready..."
+          for i in {1..10}; do
+            if nc -z -w5 ${{ steps.parse_output.outputs.HOST_IP }} 22; then
+              echo "Port 22 is open!"
+              break
+            fi
+            if [ $i -eq 10 ]; then
+              echo "Timed out waiting for port 22"
+              exit 1
+            fi
+            echo "Attempt $i: Port 22 is not open yet. Waiting..."
+            sleep 30
+          done
+
       - name: Run Ansible playbooks
         run: |
           echo "$SSH_PRIVATE_KEY" > private_key.pem
           chmod 600 private_key.pem
-          echo "Private key contents (first line):"
-          head -n 1 private_key.pem
           echo "Attempting to connect to ${{ steps.parse_output.outputs.HOST_IP }}"
           ssh -i private_key.pem -o StrictHostKeyChecking=no -v $ANSIBLE_USER@${{ steps.parse_output.outputs.HOST_IP }} "echo 'SSH connection successful'"
           ansible-playbook -i "${{ steps.parse_output.outputs.HOST_IP }}," \
