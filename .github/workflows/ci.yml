@@ -89,7 +89,7 @@ jobs:
             --private-key=private_key.pem \
             -u $ANSIBLE_USER \
             -e "ansible_ssh_common_args='-o StrictHostKeyChecking=no'" \
-            path/to/your/playbook.yml
+            playbooks/deploy-server.yml
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
           ANSIBLE_USER: ${{ secrets.ANSIBLE_USER }}
