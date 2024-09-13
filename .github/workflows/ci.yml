@@ -101,7 +101,7 @@ jobs:
         run: |
           echo "$SSH_PRIVATE_KEY" > private_key.pem
           chmod 600 private_key.pem
-          ssh-copy-id -f "-o IdentityFile private_key.pem" StrictHostKeyChecking=no ubuntu@${{ steps.parse_output.outputs.HOST_IP }}
+          ssh-copy-id -f "-o IdentityFile private_key.pem" ubuntu@${{ steps.parse_output.outputs.HOST_IP }}
           ssh -i private_key.pem -o StrictHostKeyChecking=no -v ubuntu@${{ steps.parse_output.outputs.HOST_IP }} "echo 'SSH connection successful'"
 
       - name: Run Ansible playbooks
