@@ -102,3 +102,7 @@ jobs:
             echo "Attempt $i: Port 22 is not open yet. Waiting..."
             sleep 30
           done
+
+      - name: ping server using ansible
+        run: |
+          ansible -i hosts all -m ping
