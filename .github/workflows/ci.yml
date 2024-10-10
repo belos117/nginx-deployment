@@ -105,4 +105,4 @@ jobs:
 
       - name: ping server using ansible
         run: |
-          ansible ${{ steps.parse_output.outputs.HOST_IP }} -m ping
+          ansible -i /app-server/inventory.ini -m ping
