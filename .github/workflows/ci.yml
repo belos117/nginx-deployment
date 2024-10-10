@@ -105,4 +105,4 @@ jobs:
 
       - name: ping server using ansible
         run: |
-          ansible -i hosts all -m ping
+          ansible -i inventory.ini hosts all -m ping
