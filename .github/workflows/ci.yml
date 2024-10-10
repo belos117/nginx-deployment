@@ -105,6 +105,4 @@ jobs:
 
       - name: ping server using ansible
         run: |
-          pwd
-          ls
-          ansible -i /app-server/inventory.ini all -m ping
+          ansible -i /playbooks/inventory.ini all -m ping
