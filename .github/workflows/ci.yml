@@ -106,7 +106,8 @@ jobs:
 
       - name: ping server using ansible
         run: |
+          ssh -i /home/runner/work/nginx-deployment/nginx-deployment/private_key.pem ubuntu@${{ steps.parse_output.outputs.HOST_IP }}
           cd playbooks
           pwd
           cat /home/runner/work/nginx-deployment/nginx-deployment/playbooks/inventory.ini
-          ansible -i inventory.ini all -m ping StrictHostKeyChecking=no
+          ansible -i inventory.ini all -m ping --private-key /home/runner/work/nginx-deployment/nginx-deployment/private_key.pem
