@@ -108,4 +108,5 @@ jobs:
         run: |
           cd playbooks
           pwd
-          ansible -i inventory.ini hosts all -m ping
+          cat /home/runner/work/nginx-deployment/nginx-deployment/playbooks/inventory.ini
+          ansible -i inventory.ini all -m ping
