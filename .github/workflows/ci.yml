@@ -81,8 +81,7 @@ jobs:
           IP=$(terraform output -json | jq -r '.instance_public_ip.value')
           echo "Server IP: $IP"
           echo "HOST_IP=$IP" >> $GITHUB_OUTPUT
-          echo "HOST_IP=$IP" > ./playbooks/inventory.ini
-        working-directory: ./
+        working-directory: ./app-server
     
       - name: Add HOST IP to GitHub Secrets
         run: |
@@ -106,4 +105,5 @@ jobs:
 
       - name: ping server using ansible
         run: |
-          ansible -i /playbooks/inventory.ini all -m ping
+          cd playbooks
+          ansible -i inventory.ini hosts all -m ping
