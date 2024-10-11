@@ -109,4 +109,4 @@ jobs:
           cd playbooks
           pwd
           cat /home/runner/work/nginx-deployment/nginx-deployment/playbooks/inventory.ini
-          ansible -i inventory.ini all -m ping
+          ansible -i inventory.ini all -m ping StrictHostKeyChecking=no
