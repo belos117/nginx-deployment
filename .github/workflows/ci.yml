@@ -106,4 +106,5 @@ jobs:
       - name: ping server using ansible
         run: |
           cd playbooks
+          pwd
           ansible -i inventory.ini hosts all -m ping
