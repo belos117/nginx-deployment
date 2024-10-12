@@ -107,5 +107,4 @@ jobs:
       - name: Ping server using ansible
         run: |
           echo ${{ secrets.SSH_PRIVATE_KEY }} > private_key.pem
-          ssh -i ./private_key.pem ubuntu@${{ steps.parse_output.outputs.HOST_IP }}
-          ansible -i ${{ steps.parse_output.outputs.HOST_IP }}, all -m ping -u ubuntu --private-key=./private_key.pem
+          ansible -o StrictHostKeyChecking=no -i ${{ steps.parse_output.outputs.HOST_IP }}, all -m ping -u ubuntu --private-key=./private_key.pem
