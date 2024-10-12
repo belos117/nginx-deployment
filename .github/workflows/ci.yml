@@ -104,6 +104,11 @@ jobs:
             sleep 30
           done
 
+      - name: Update OpenSSL
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y openssl libssl-dev
+
       - name: Ping server using ansible
         run: |
           echo ${{ secrets.SSH_PRIVATE_KEY }} > private_key.pem
