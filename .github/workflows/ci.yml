@@ -103,8 +103,3 @@ jobs:
             echo "Attempt $i: Port 22 is not open yet. Waiting..."
             sleep 30
           done
-
-      - name: ping server using ansible
-        run: |
-          cd playbooks
-          ansible -i inventory.ini -m ping
