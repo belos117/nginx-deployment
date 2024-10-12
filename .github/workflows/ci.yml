@@ -110,4 +110,4 @@ jobs:
           pwd
           ls
           cat private_key.pem
-          ansible -i ${{ steps.parse_output.outputs.HOST_IP }}, all -m ping -u ubuntu --private-key=./private_key.pem ansible_ssh_common_args='-o StrictHostKeyChecking=no'
+          ansible -i ${{ steps.parse_output.outputs.HOST_IP }}, all -m ping -u ubuntu --private-key=./private_key.pem --ssh_common_args='-o StrictHostKeyChecking=no'
