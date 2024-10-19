@@ -100,7 +100,7 @@ jobs:
               echo "Timed out waiting for port 22"
               exit 1
             fi
-            echo "Attempt $i: Port 22 is not open yet. Waiting..."
+            echo "Attempt $i: Port 22 is not open yet. Waiting...."
             sleep 30
           done
 
