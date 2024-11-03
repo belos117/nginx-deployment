@@ -87,22 +87,6 @@ jobs:
           echo "${{ steps.parse_output.outputs.HOST_IP }}" > /tmp/host_ip.txt
           echo "ubuntu@${{ steps.parse_output.outputs.HOST_IP }}" > /home/runner/work/nginx-deployment/nginx-deployment/playbooks/inventory.ini
 
-      - name: Wait for instance to be ready
-        run: |
-          echo "Waiting for instance to be ready..."
-          for i in {1..10}; do
-            if nc -z -w5 ${{ steps.parse_output.outputs.HOST_IP }} 22; then
-              echo "Port 22 is open!"
-              break
-            fi
-            if [ $i -eq 10 ]; then
-              echo "Timed out waiting for port 22"
-              exit 1
-            fi
-            echo "Attempt $i: Port 22 is not open yet. Waiting...."
-            sleep 30
-          done
-
       - name: Update OpenSSL
         run: |
           sudo apt-get update
