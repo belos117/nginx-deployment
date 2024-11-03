@@ -20,9 +20,9 @@
         content: |
           <!DOCTYPE html>
           <html>
-          <head><title>Server Details</title></head>
+          <head><title>Henkel's Sever</title></head>
           <body>
-          <h1>Served from {{ ansible_hostname }}</h1>
+          <h1>Just another project to demonstrate cicd on git hub actions</h1>
           </body>touch
           </html>
         mode: "0644"
