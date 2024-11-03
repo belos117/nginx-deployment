@@ -80,7 +80,6 @@ jobs:
         run: |
           IP=$(terraform output -json | jq -r '.instance_public_ip.value')
           echo "Server IP: $IP"
-          echo "HOST_IP=$IP" >> $GITHUB_OUTPUT
         working-directory: ./app-server
     
       - name: Add HOST IP to GitHub Secrets
