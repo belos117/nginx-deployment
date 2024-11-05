@@ -96,6 +96,6 @@ jobs:
         run: |
           cat /home/runner/work/nginx-deployment/nginx-deployment/playbooks/inventory.ini
           ls -la app-server
-          chmod 400 mykey.pem
+          chmod 400 ./app-server/mykey.pem
           export ANSIBLE_HOST_KEY_CHECKING=False
           ansible -i ${{ steps.parse_output.outputs.HOST_IP }}, all -m ping -u ubuntu --private-key=./app-server/mykey.pem
