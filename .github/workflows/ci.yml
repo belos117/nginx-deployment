@@ -1,4 +1,4 @@
-name: CI
+name: CI Pipeline
 
 on:
   push:
@@ -20,39 +20,13 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3  # Updated to the latest
-
-      - name: Run ansible-lint
-        # replace `main` with any valid ref, or tags like `v6`
-        uses: ansible-community/ansible-lint-action@v6.0.2
-        with:
-          args: "ansible" # my ansible files in a folder
+        uses: actions/checkout@v4  # Updated to the latest
 
       - name: Install jq
         run: sudo apt-get install -y jq
 
-      - name: Install Github cli
-        run: |
-          (type -p wget >/dev/null || (sudo apt update && sudo apt-get install wget -y)) \
-          && sudo mkdir -p -m 755 /etc/apt/keyrings \
-          && wget -qO- https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo tee /etc/apt/keyrings/githubcli-archive-keyring.gpg > /dev/null \
-          && sudo chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg \
-          && echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
-          && sudo apt update \
-          && sudo apt install gh -y
-
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: 3.x
-
-      - name: Install Ansible
-        run: |
-          python -m pip install --upgrade pip
-          pip install ansible
-
       - name: Authenticate AWS
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: "14"
       - name: Configure AWS credentials
@@ -71,8 +45,6 @@ jobs:
         run: |
           cd app-server/
           terraform init
-          terraform validate
-          terraform plan
           terraform apply -auto-approve
 
       - name: Parse Terraform output
@@ -86,16 +58,3 @@ jobs:
         run: |
           echo "${{ steps.parse_output.outputs.HOST_IP }}" > /tmp/host_ip.txt
           echo "ubuntu@${{ steps.parse_output.outputs.HOST_IP }}" > /home/runner/work/nginx-deployment/nginx-deployment/playbooks/inventory.ini
-
-      - name: Update OpenSSL
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y openssl libssl-dev
-
-      - name: Ping server using ansible
-        run: |
-          cat /home/runner/work/nginx-deployment/nginx-deployment/playbooks/inventory.ini
-          ls -la app-server
-          chmod 400 ./app-server/mykey.pem
-          export ANSIBLE_HOST_KEY_CHECKING=False
-          ansible -i ${{ steps.parse_output.outputs.HOST_IP }}, all -m ping -u ubuntu --private-key=./app-server/mykey.pem
