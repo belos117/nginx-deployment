@@ -51,34 +51,34 @@ jobs:
 
       - name: Configure AWS Credentials
         run: |
-            aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY }}
-            aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_KEY }}
-            aws configure set default.region eu-west-2
+          aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY }}
+          aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_KEY }}
+          aws configure set default.region eu-west-2
 
       - name: Get instance IP from Terraform
         id: get-ip
         run: |
-            cd app-server/
-            # Get IP from terraform output
-            IP=$(terraform output -raw instance_public_ip)
+          cd app-server/
+          # Get IP using json format and parse with jq
+          IP=$(terraform output -json instance_public_ip | jq -r '.[0]')
 
-            if [ -z "$IP" ]; then
-              echo "Error: Could not get instance IP from Terraform output"
-              exit 1
-            fi
+          if [ -z "$IP" ] || [ "$IP" = "null" ]; then
+            echo "Error: Could not get instance IP from Terraform output"
+            exit 1
+          fi
 
-            # Set IP in environment and output
-            echo "HOST_IP=$IP" >> $GITHUB_ENV
-            echo "instance_ip=$IP" >> $GITHUB_OUTPUT
-            echo "Instance IP: $IP"
+          # Set IP in environment and output
+          echo "HOST_IP=$IP" >> $GITHUB_ENV
+          echo "instance_ip=$IP" >> $GITHUB_OUTPUT
+          echo "Instance IP: $IP"
 
       - name: Verify IP
         run: |
-            if [ -z "${{ env.HOST_IP }}" ]; then
-              echo "HOST_IP is not set"
-              exit 1
-            fi
-            echo "Successfully set HOST_IP to ${{ env.HOST_IP }}"
+          if [ -z "${{ env.HOST_IP }}" ]; then
+            echo "HOST_IP is not set"
+            exit 1
+          fi
+          echo "Successfully set HOST_IP to ${{ env.HOST_IP }}"
 
       - name: Setup SSH key
         run: |
