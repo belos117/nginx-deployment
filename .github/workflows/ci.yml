@@ -47,12 +47,6 @@ jobs:
           terraform init
           terraform apply -auto-approve
 
-      - name: Install AWS CLI
-        run: |
-          curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-          unzip awscliv2.zip
-          sudo ./aws/install
-
       - name: Get instance IP
         run: |
           IP=$(aws ec2 describe-instances \
