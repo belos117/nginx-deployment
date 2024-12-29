@@ -29,12 +29,14 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "14"
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: "${{ secrets.AWS_ACCESS_KEY }}"
           aws-secret-access-key: "${{ secrets.AWS_SECRET_KEY }}"
           aws-region: eu-west-2
+
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
         with:
@@ -47,18 +49,34 @@ jobs:
           terraform init
           terraform apply -auto-approve
 
+          - name: Configure AWS Credentials
+          run: |
+            aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY }}
+            aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_KEY }}
+            aws configure set default.region eu-west-2
+
       - name: Get instance IP
         run: |
-          IP=$(aws ec2 describe-instances \
-            --filters "Name=tag:Name,Values=my-instance" "Name=instance-state-name,Values=running" \
-            --query 'Reservations[].Instances[].PublicIpAddress' \
-            --output text)
-          if [ -z "$IP" ]; then
-            echo "Error: Could not find instance IP"
-            exit 1
-          fi
-          echo "HOST_IP=$IP" >> $GITHUB_ENV
-          echo "Found instance IP: $IP"
+            # Debug output
+            echo "Listing EC2 instances..."
+            aws ec2 describe-instances --query 'Reservations[].Instances[].[Tags[?Key==`Name`].Value[],PublicIpAddress,State.Name]' --output table
+
+            # Get IP with improved error handling
+            IP=$(aws ec2 describe-instances \
+              --filters "Name=tag:Name,Values=my-instance" "Name=instance-state-name,Values=running" \
+              --query 'Reservations[].Instances[].PublicIpAddress' \
+              --output text)
+
+            # Validate result
+            if [ -z "$IP" ]; then
+              echo "Error: Could not find instance IP"
+              echo "Available instances:"
+              aws ec2 describe-instances --query 'Reservations[].Instances[].Tags[?Key==`Name`]' --output text
+              exit 1
+            fi
+
+            echo "HOST_IP=$IP" >> $GITHUB_ENV
+            echo "Found instance IP: $IP"
 
       - name: Verify HOST_IP
         run: |
