@@ -47,24 +47,44 @@ jobs:
           terraform init
           terraform apply -auto-approve
 
+      - name: Install AWS CLI
+        run: |
+          curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+          unzip awscliv2.zip
+          sudo ./aws/install
+
       - name: Get instance IP
         run: |
-          echo "HOST_IP=$(aws ec2 describe-instances \
-            --filters "Name=tag:Name,Values=my-instance" \
+          IP=$(aws ec2 describe-instances \
+            --filters "Name=tag:Name,Values=my-instance" "Name=instance-state-name,Values=running" \
             --query 'Reservations[].Instances[].PublicIpAddress' \
-            --output text)" >> $GITHUB_ENV
+            --output text)
+          if [ -z "$IP" ]; then
+            echo "Error: Could not find instance IP"
+            exit 1
+          fi
+          echo "HOST_IP=$IP" >> $GITHUB_ENV
+          echo "Found instance IP: $IP"
 
-      - name: Install Ansible
+      - name: Verify HOST_IP
         run: |
-          sudo apt update
-          sudo apt install -y ansible
+          if [ -z "${{ env.HOST_IP }}" ]; then
+            echo "HOST_IP is not set"
+            exit 1
+          fi
 
       - name: Setup SSH key
         run: |
           mkdir -p ~/.ssh
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H ${{ env.HOST_IP }} >> ~/.ssh/known_hosts
+          echo "Running ssh-keyscan for ${{ env.HOST_IP }}"
+          ssh-keyscan -H "${{ env.HOST_IP }}" >> ~/.ssh/known_hosts || exit 1
+
+      - name: Install Ansible
+        run: |
+          sudo apt update
+          sudo apt install -y ansible
 
       - name: Run Ansible playbook
         run: |
