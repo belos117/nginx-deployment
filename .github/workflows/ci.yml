@@ -57,4 +57,4 @@ jobs:
       - name: Add HOST IP to GitHub Secrets
         run: |
           echo "${{ steps.parse_output.outputs.HOST_IP }}" > /tmp/host_ip.txt
-          echo "ubuntu@${{ steps.parse_output.outputs.HOST_IP }}" > /home/runner/work/nginx-deployment/nginx-deployment/playbooks/inventory.ini
+          echo "ubuntu@${{ steps.parse_output.outputs.HOST_IP }}" > ${{ HOST_IP }}

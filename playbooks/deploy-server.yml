@@ -23,7 +23,7 @@
           <head><title>Henkel's Sever</title></head>
           <body>
           <h1>Just another project to demonstrate cicd on git hub actions</h1>
-          </body>touch
+          </body>
           </html>
         mode: "0644"
 
