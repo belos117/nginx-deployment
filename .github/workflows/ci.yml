@@ -47,13 +47,28 @@ jobs:
           terraform init
           terraform apply -auto-approve
 
-      - name: Parse Terraform output
-        id: parse_output
+      - name: Get instance IP
         run: |
-          IP=$(terraform output -json | jq -r '.instance_public_ip.value')
-          echo "Server IP: $IP"
-        working-directory: ./app-server
-    
-      - name: Add HOST IP to GitHub Secrets
+          echo "HOST_IP=$(aws ec2 describe-instances \
+            --filters "Name=tag:Name,Values=my-instance" \
+            --query 'Reservations[].Instances[].PublicIpAddress' \
+            --output text)" >> $GITHUB_ENV
+
+      - name: Install Ansible
         run: |
-          echo "${{ steps.parse_output.outputs.HOST_IP }}" > /tmp/host_ip.txt
+          sudo apt update
+          sudo apt install -y ansible
+
+      - name: Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ env.HOST_IP }} >> ~/.ssh/known_hosts
+
+      - name: Run Ansible playbook
+        run: |
+            ansible-playbook -i "${{ env.HOST_IP }}," \
+            --private-key ~/.ssh/id_rsa \
+            -u ${{ secrets.ANSIBLE_USER }} \
+            deploy-server.yml
