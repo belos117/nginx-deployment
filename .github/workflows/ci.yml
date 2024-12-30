@@ -100,10 +100,6 @@ jobs:
             }
           done
 
-      - name: Test SSH Connection
-        run: |
-          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa "ubuntu@${{ env.HOST_IP }}" "echo 'SSH connection successful'"
-
       - name: Install Ansible
         run: |
           sudo apt update
