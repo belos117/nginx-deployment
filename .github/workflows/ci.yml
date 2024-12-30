@@ -107,7 +107,7 @@ jobs:
 
       - name: Run Ansible playbook
         run: |
-            ansible-playbook -i "${{ env.HOST_IP }}," \
+            ansible-playbook -i "ubuntu@${{ env.HOST_IP }}," \
             --private-key ~/.ssh/id_rsa \
             -u ubuntu \
             playbooks/deploy-server.yml
