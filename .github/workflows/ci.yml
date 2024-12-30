@@ -110,4 +110,4 @@ jobs:
             ansible-playbook -i "${{ env.HOST_IP }}," \
             --private-key ~/.ssh/id_rsa \
             -u ubuntu \
-            deploy-server.yml
+            playbooks/deploy-server.yml
