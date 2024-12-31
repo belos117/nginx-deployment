@@ -87,7 +87,7 @@ jobs:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/mykey
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" | base64 --decode > ~/.ssh/mykey
           chmod 600 ~/.ssh/mykey
           echo "Running ssh-keyscan for ${{ env.HOST_IP }}"
           # Add verbose output and multiple attempts
@@ -112,6 +112,5 @@ jobs:
         env:
           ANSIBLE_USER: "ubuntu"
         run: |
-          cat ~/.ssh/mykey
           export ANSIBLE_USER="ubuntu" 
           ssh -o StrictHostKeyChecking=no -i ~/.ssh/mykey "$ANSIBLE_USER@${{ env.HOST_IP }}"
