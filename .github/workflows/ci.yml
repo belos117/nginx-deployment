@@ -100,14 +100,6 @@ jobs:
             }
           done
 
-      - name: Install Ansible
+      - name: Test SSH Connection
         run: |
-          sudo apt update
-          sudo apt install -y ansible
-
-      - name: Run Ansible playbook
-        run: |
-            ansible-playbook -i "ubuntu@${{ env.HOST_IP }}," \
-            --private-key ~/.ssh/id_rsa \
-            -u ubuntu \
-            playbooks/deploy-server.yml
+            ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ${{ secrets.ANSIBLE_USER }}@${{ env.HOST_IP }} "echo 'SSH connection successful'"
