@@ -15,12 +15,12 @@ jobs:
       SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
       SSH_PUBLIC_KEY: ${{ secrets.SSH_PUBLIC_KEY }}
       TF_TOKEN: ${{ secrets.TF_TOKEN }}
-      ANSIBLE_USER: ${{ secrets.ANSIBLE_USER }}
+      ANSIBLE_USER: "ubuntu"
       HOST_IP: ${{ secrets.HOST_IP }}
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4  # Updated to the latest
+        uses: actions/checkout@v4 # Updated to the latest
 
       - name: Install jq
         run: sudo apt-get install -y jq
@@ -110,6 +110,6 @@ jobs:
 
       - name: Test SSH Connection
         env:
-          ANSIBLE_USER: ${{ secrets.ANSIBLE_USER }}
+          ANSIBLE_USER: "ubuntu"
         run: |
           ssh -o StrictHostKeyChecking=no -i ~/.ssh/mykey "${ANSIBLE_USER}@${{ env.HOST_IP }}" "echo 'SSH connection successful'"
