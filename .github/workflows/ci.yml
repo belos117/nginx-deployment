@@ -112,4 +112,5 @@ jobs:
         env:
           ANSIBLE_USER: "ubuntu"
         run: |
-          ssh -o StrictHostKeyChecking=no -i ~/.ssh/mykey "${ANSIBLE_USER}@${{ env.HOST_IP }}" "echo 'SSH connection successful'"
+          export ANSIBLE_USER = "ubuntu" 
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/mykey "$ANSIBLE_USER@${{ env.HOST_IP }}"
