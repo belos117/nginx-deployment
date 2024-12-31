@@ -104,5 +104,5 @@ jobs:
         env:
           ANSIBLE_USER: ${{ secrets.ANSIBLE_USER }}
         run: |
-            ubuntu="${{ secrets.ANSIBLE_USER }}"
-            ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ubuntu@${{ env.HOST_IP }} "echo 'SSH connection successful'"
+            UBUNTU="${{ secrets.ANSIBLE_USER }}"
+            ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa "$UBUNTU"@${{ env.HOST_IP }} "echo 'SSH connection successful'"
