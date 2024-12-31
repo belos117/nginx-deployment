@@ -106,19 +106,25 @@ jobs:
           echo "ANSIBLE_USER is set: ${{ env.ANSIBLE_USER != '' }}"
           echo "HOST_IP is: ${{ env.HOST_IP }}"
 
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          # Write private key with proper line endings
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" | tr -d '\r' > ~/.ssh/mykey.pem
+          chmod 600 ~/.ssh/mykey.pem
+          ls -la ~/.ssh/mykey.pem
+
       - name: Test SSH Connection
         env:
           ANSIBLE_USER: ${{ secrets.ANSIBLE_USER }}
         run: |
-          # Debug output
-          if [ -z "$ANSIBLE_USER" ]; then
-            echo "Error: ANSIBLE_USER is empty"
-            exit 1
-          fi
-          echo "Attempting SSH connection as user: $ANSIBLE_USER to host: ${{ env.HOST_IP }}"
+          # Debug SSH key
+          ssh-keygen -l -f ~/.ssh/mykey.pem || echo "Invalid key format"
 
-          # Try SSH connection
-          ssh -v -o StrictHostKeyChecking=no \
-              -i ~/.ssh/mykey.pem \
+          # Try connection with fixed options
+          ssh -v -i ~/.ssh/mykey.pem \
+              -o StrictHostKeyChecking=no \
+              -o IdentitiesOnly=yes \
+              -o UserKnownHostsFile=/dev/null \
               "${ANSIBLE_USER}@${{ env.HOST_IP }}" \
               "echo 'SSH connection successful'"
