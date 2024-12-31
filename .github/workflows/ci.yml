@@ -101,5 +101,8 @@ jobs:
           done
 
       - name: Test SSH Connection
+        env:
+          ANSIBLE_USER: ${{ secrets.ANSIBLE_USER }}
         run: |
-            ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa 'ubuntu'@${{ env.HOST_IP }} "echo 'SSH connection successful'"
+            USER="${{ secrets.ANSIBLE_USER }}"
+            ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa $USER@${{ env.HOST_IP }} "echo 'SSH connection successful'"
