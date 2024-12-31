@@ -85,8 +85,8 @@ jobs:
       - name: Setup SSH key
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/mykey.pem
+          chmod 600 ~/.ssh/mykey.pem
           echo "Running ssh-keyscan for ${{ env.HOST_IP }}"
           # Add verbose output and multiple attempts
           for i in {1..3}; do
@@ -100,8 +100,25 @@ jobs:
             }
           done
 
+      - name: Debug Environment
+        run: |
+          echo "Checking environment variables..."
+          echo "ANSIBLE_USER is set: ${{ env.ANSIBLE_USER != '' }}"
+          echo "HOST_IP is: ${{ env.HOST_IP }}"
+
       - name: Test SSH Connection
         env:
           ANSIBLE_USER: ${{ secrets.ANSIBLE_USER }}
         run: |
-            ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa "$ANSIBLE_USER"@${{ env.HOST_IP }} "echo 'SSH connection successful'"
+          # Debug output
+          if [ -z "$ANSIBLE_USER" ]; then
+            echo "Error: ANSIBLE_USER is empty"
+            exit 1
+          fi
+          echo "Attempting SSH connection as user: $ANSIBLE_USER to host: ${{ env.HOST_IP }}"
+
+          # Try SSH connection
+          ssh -v -o StrictHostKeyChecking=no \
+              -i ~/.ssh/mykey.pem \
+              "${ANSIBLE_USER}@${{ env.HOST_IP }}" \
+              "echo 'SSH connection successful'"
