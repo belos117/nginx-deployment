@@ -1,6 +1,6 @@
 resource "aws_s3_bucket" "terraform_state" {
   bucket = var.s3_bucket_name
-  
+
   lifecycle {
     prevent_destroy = true
   }
@@ -30,44 +30,41 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "state_encryption"
 
 resource "aws_s3_bucket_public_access_block" "state_access" {
   bucket = aws_s3_bucket.terraform_state.id
-  
+
   block_public_acls       = true
   block_public_policy     = true
   ignore_public_acls      = true
   restrict_public_buckets = true
 }
 
-output "s3_bucket_name" {
-  value = aws_s3_bucket.terraform_state.id
-}
-
 resource "aws_s3_bucket_logging" "state_access_logging" {
-  bucket = aws_s3_bucket.terraform_state.id
+  bucket        = aws_s3_bucket.terraform_state.id
   target_bucket = aws_s3_bucket.terraform_logs.id
   target_prefix = "log/"
 }
 
-resource "aws_s3_bucket_public_access_block" "state_access" {
-  bucket = aws_s3_bucket.terraform_state.id
-  
-  block_public_acls       = true
-  block_public_policy     = true
-  ignore_public_acls      = true
-  restrict_public_buckets = true
-}
-
 resource "aws_s3_bucket" "terraform_logs" {
   bucket = var.logs_bucket_name
-  
+
   lifecycle {
     prevent_destroy = true
   }
 }
 
-resource "aws_s3_bucket_acl" "logs_acl" {
+resource "aws_s3_bucket_ownership_controls" "logs_ownership" {
   bucket = aws_s3_bucket.terraform_logs.id
-  acl    = "log-delivery-write"
+  rule {
+    object_ownership = "BucketOwnerPreferred"
+  }
 }
+
+resource "aws_s3_bucket_acl" "logs_acl" {
+  depends_on = [aws_s3_bucket_ownership_controls.logs_ownership]
+  bucket     = aws_s3_bucket.terraform_logs.id
+  acl        = "log-delivery-write"
+}
+
+data "aws_caller_identity" "current" {}
 
 data "aws_iam_policy_document" "terraform_state_access" {
   statement {
@@ -91,8 +88,10 @@ data "aws_iam_policy_document" "terraform_state_access" {
   statement {
     effect = "Allow"
     principals {
-      type        = "AWS"
-      identifiers = ["arn:aws:iam::YOUR_ACCOUNT_ID:user/terraform-user"]
+      type = "AWS"
+      identifiers = [
+        data.aws_caller_identity.current.arn
+      ]
     }
     actions = [
       "s3:ListBucket",
@@ -113,11 +112,11 @@ resource "aws_s3_bucket_policy" "state_bucket_policy" {
 }
 
 output "s3_bucket_name" {
-  value = aws_s3_bucket.terraform_state.id
+  value       = aws_s3_bucket.terraform_state.id
   description = "Name of the S3 bucket for Terraform state"
 }
 
 output "logs_bucket_name" {
-  value = aws_s3_bucket.terraform_logs.id
+  value       = aws_s3_bucket.terraform_logs.id
   description = "Name of the S3 bucket for access logs"
 }

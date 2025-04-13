@@ -9,14 +9,13 @@ terraform {
 
 terraform {
   backend "s3" {
-    bucket         = var.s3_bucket_name
-    key            = var.backend_key
-    region         = var.aws_region
+    bucket         = "henks-nginx-deployment-terraform-state"
+    key            = "infrastructure/terraform.tfstate"
+    region         = "us-east-1"
     encrypt        = true
     use_lockfile   = true
   }
 }
-
 provider "aws" {
-  region = var.aws_region
+  region = "us-east-1"
 }
