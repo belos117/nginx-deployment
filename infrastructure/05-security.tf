@@ -8,7 +8,7 @@ resource "aws_security_group" "bastion" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0/0"]
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   egress {
@@ -41,10 +41,10 @@ resource "aws_security_group" "frontend" {
   }
 
   ingress {
-    description = "SSH from bastion"
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
+    description     = "SSH from bastion"
+    from_port       = 22
+    to_port         = 22
+    protocol        = "tcp"
     security_groups = [aws_security_group.bastion.id]
   }
 
@@ -62,18 +62,18 @@ resource "aws_security_group" "backend" {
   vpc_id      = module.vpc.vpc_id
 
   ingress {
-    description = "SSH from bastion"
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
+    description     = "SSH from bastion"
+    from_port       = 22
+    to_port         = 22
+    protocol        = "tcp"
     security_groups = [aws_security_group.bastion.id]
   }
 
   ingress {
-    description = "App port from frontend"
-    from_port   = 5000
-    to_port     = 5000
-    protocol    = "tcp"
+    description     = "App port from frontend"
+    from_port       = 5000
+    to_port         = 5000
+    protocol        = "tcp"
     security_groups = [aws_security_group.frontend.id]
   }
 

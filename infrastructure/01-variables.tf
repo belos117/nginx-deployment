@@ -9,7 +9,7 @@ variable "backend_key" {
   description = "The key for the S3 bucket to store the Terraform state file"
   type        = string
   default     = "infrastructure/terraform.tfstate"
-  
+
 }
 
 # Variables for Backend
